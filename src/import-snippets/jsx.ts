@@ -1,7 +1,20 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 import { getFileExt } from '../utilities';
 import { FileExtension } from '../model';
+
+// Helper function to convert filename to PascalCase component name
+function getSvgComponentName(filePath: string): string {
+  // Extract the filename without extension
+  const filename = path.basename(filePath, '.svg');
+  
+  // Convert to PascalCase
+  return filename
+    .split(/[-_\s]+/) // Split by dashes, underscores, or spaces
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join('');
+}
 
 export function snippet(
   relativePath: string,
@@ -9,9 +22,10 @@ export function snippet(
 ): vscode.SnippetString {
   // Check if the file is an SVG
   if (getFileExt(fromFilepath) === '.svg') {
-    // Create a snippet that includes the reference comment and the import
-    return new vscode.SnippetString(`/// <reference types="vite-plugin-svgr/client" />
-import name$1 from '${relativePath + getFileExt(fromFilepath)}?react';`);
+    const componentName = getSvgComponentName(fromFilepath);
+    
+    // Return the import with ?react suffix
+    return new vscode.SnippetString(`import ${componentName} from '${relativePath + getFileExt(fromFilepath)}?react';`);
   }
 
   switch (getFileExt(fromFilepath) as FileExtension) {
@@ -43,4 +57,5 @@ import name$1 from '${relativePath + getFileExt(fromFilepath)}?react';`);
       return new vscode.SnippetString(``);
     }
   }
+
 }

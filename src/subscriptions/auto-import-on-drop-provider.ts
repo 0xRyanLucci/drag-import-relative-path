@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 import { importStatementSnippet, getRelativePath, getFileExt, notify } from '../utilities';
 import { NotifyType } from '../model';
@@ -9,7 +10,7 @@ import { htmlSupported, markdownSupported, cssSupported, scssSupported, permitte
  */
 export class AutoImportOnDropProvider implements vscode.DocumentDropEditProvider {
   async provideDocumentDropEdits(
-		_document: vscode.TextDocument,
+		document: vscode.TextDocument,
 		position: vscode.Position,
 		dataTransfer: vscode.DataTransfer,
 		token: vscode.CancellationToken
@@ -19,7 +20,7 @@ export class AutoImportOnDropProvider implements vscode.DocumentDropEditProvider
       Get the active text editor file path and dragged file path from tree view
       */
     const dataTransferItem = dataTransfer.get('text/plain');
-    const dropFilePath = _document.uri.fsPath;
+    const dropFilePath = document.uri.fsPath;
     const dragFilePath = dataTransferItem.value;
 
     /* 
@@ -50,6 +51,25 @@ export class AutoImportOnDropProvider implements vscode.DocumentDropEditProvider
       return { insertText: relativePath(dropFilePath, dragFilePath) };
     }
 
+    // Check if it's SVG into JSX/TSX and needs reference
+    let additionalEdit: vscode.WorkspaceEdit | undefined = undefined;
+    
+    if (getFileExt(dragFilePath) === '.svg' && 
+        (getFileExt(dropFilePath) === '.jsx' || getFileExt(dropFilePath) === '.tsx')) {
+      const documentText = document.getText();
+      const needsReference = !documentText.includes('/// <reference types="vite-plugin-svgr/client" />');
+      
+      if (needsReference) {
+        // Add reference at the top of the file
+        additionalEdit = new vscode.WorkspaceEdit();
+        additionalEdit.insert(
+          document.uri,
+          new vscode.Position(0, 0),
+          '/// <reference types="vite-plugin-svgr/client" />\n\n'
+        );
+      }
+    }
+
     const snippet = importStatementSnippet(
       getRelativePath(dropFilePath, dragFilePath),
       dragFilePath,
@@ -64,7 +84,10 @@ export class AutoImportOnDropProvider implements vscode.DocumentDropEditProvider
     /* 
       Insert text
       */
-    return { insertText: snippet };
+    return { 
+      insertText: snippet,
+      additionalEdit
+    };
   }
 }
 
