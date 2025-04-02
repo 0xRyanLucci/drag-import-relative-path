@@ -7,6 +7,12 @@ export function snippet(
   relativePath: string,
   fromFilepath: string
 ): vscode.SnippetString {
+  // Check if the file is an SVG
+  if (getFileExt(fromFilepath) === '.svg') {
+    // Create a snippet that includes the reference comment and the import
+    return new vscode.SnippetString(`/// <reference types="vite-plugin-svgr/client" />
+import name$1 from '${relativePath + getFileExt(fromFilepath)}?react';`);
+  }
 
   switch (getFileExt(fromFilepath) as FileExtension) {
     case '.gif': // Images
@@ -37,5 +43,4 @@ export function snippet(
       return new vscode.SnippetString(``);
     }
   }
-
 }

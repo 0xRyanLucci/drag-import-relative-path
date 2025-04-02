@@ -8,7 +8,7 @@ type StylesheetFileExtension = '.css' | '.scss';
 
 type ScriptFileExtension = '.ts' | '.tsx' | '.js' | '.jsx';
 
-type ImageFileExtension = '.gif' | '.jpeg' | '.jpg' | '.png' | '.webp';
+type ImageFileExtension = '.gif' | '.jpeg' | '.jpg' | '.png' | '.webp' | '.svg';
 
 type FontFileExtension = '.woff' | '.woff2' | '.ttf' | '.eot';
 

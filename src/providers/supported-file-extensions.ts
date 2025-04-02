@@ -3,7 +3,7 @@ import { FileExtension } from "../model";
 /* 
   Supported image files extensions 
   */
-const supportedImages: FileExtension[] = [ '.gif', '.jpeg', '.jpg', '.png', '.webp' ];
+const supportedImages: FileExtension[] = [ '.gif', '.jpeg', '.jpg', '.png', '.webp', '.svg' ];
 
 /* 
   Supported import file extensions to HTML 
